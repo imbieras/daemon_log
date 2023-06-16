@@ -24,8 +24,14 @@ struct arguments {
 };
 
 void signal_handler(int signal);
+int load_args_from_cfg(struct arguments *arguments);
+void prepare_args(struct argp argp, int argc, char **argv,
+                  struct arguments *arguments);
+void free_args(struct arguments *arguments);
 error_t parse_opt(int key, char *arg, struct argp_state *state);
 void daemonize();
-int execute_command(const char *command, char **dest);
+int execute_command(const char *command, char *dest);
+int write_json_to_file(const char *message, const char *filepath);
+char *path_from_home(char *filepath);
 
 #endif // HELPER_H

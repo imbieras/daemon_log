@@ -35,7 +35,7 @@
 *.i*86
 *.x86_64
 *.hex
-./src/daemon_log
+daemon_log
 
 # Debug files
 *.dSYM/
@@ -55,3 +55,6 @@ dkms.conf
 # Directories
 ./tuya-iot-core-sdk/examples
 ./tuya-iot-core-sdk/build
+
+# Configuration files
+config.conf

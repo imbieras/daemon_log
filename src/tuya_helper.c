@@ -4,6 +4,8 @@
 #include "tuya_cacert.h"
 #include <syslog.h>
 
+extern char *response_filepath;
+
 void on_connected(tuya_mqtt_context_t *context, void *user_data) {
   syslog(LOG_INFO, "Client connected");
 }
@@ -14,12 +16,21 @@ void on_disconnect(tuya_mqtt_context_t *context, void *user_data) {
 
 void on_messages(tuya_mqtt_context_t *context, void *user_data,
                  const tuyalink_message_t *msg) {
+  if (response_filepath == NULL) {
+    syslog(LOG_ERR, "Response file path is not set");
+    return;
+  }
+
   syslog(LOG_INFO, "On message id:%s, type:%d, code:%d", msg->msgid, msg->type,
          msg->code);
   switch (msg->type) {
   case THING_TYPE_PROPERTY_REPORT_RSP:
     syslog(LOG_INFO, "Cloud received and replied: id:%s, type:%d", msg->msgid,
            msg->type);
+    break;
+  case THING_TYPE_PROPERTY_SET:
+    syslog(LOG_INFO, "Device received id:%s, type:%d", msg->msgid, msg->type);
+    write_json_to_file(msg->data_string, response_filepath);
     break;
   default:
     break;
