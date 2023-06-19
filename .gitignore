@@ -55,6 +55,3 @@ dkms.conf
 # Directories
 ./tuya-iot-core-sdk/examples
 ./tuya-iot-core-sdk/build
-
-# Configuration files
-config.conf

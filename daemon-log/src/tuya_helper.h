@@ -1,7 +1,7 @@
 #ifndef TUYA_HELPER_H
 #define TUYA_HELPER_H
 
-#include "../tuya-iot-core-sdk/include/tuyalink_core.h"
+#include <tuyalink_core.h>
 
 void on_connected(tuya_mqtt_context_t *context, void *user_data);
 void on_disconnect(tuya_mqtt_context_t *context, void *user_data);

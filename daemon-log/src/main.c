@@ -1,5 +1,3 @@
-#include "../tuya-iot-core-sdk/include/tuyalink_core.h"
-#include "../tuya-iot-core-sdk/utils/tuya_error_code.h"
 #include "helper.h"
 #include "tuya_helper.h"
 #include <argp.h>
@@ -11,6 +9,8 @@
 #include <sys/stat.h>
 #include <syslog.h>
 #include <time.h>
+#include <tuya_error_code.h>
+#include <tuyalink_core.h>
 #include <unistd.h>
 
 const char *command = "echo 'Hello world'";
@@ -21,7 +21,6 @@ tuya_mqtt_context_t *client = &client_instance;
 static struct argp argp = {options, parse_opt, 0, doc};
 
 bool stop_loop = false;
-bool args_need_free = true;
 char *response_filepath = NULL;
 
 int main(int argc, char **argv) {
@@ -31,7 +30,7 @@ int main(int argc, char **argv) {
 
   struct arguments arguments = {false, NULL, NULL, NULL};
 
-  prepare_args(argp, argc, argv, &arguments);
+  argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
   signal(SIGINT, signal_handler);
 
@@ -55,8 +54,6 @@ int main(int argc, char **argv) {
 
   client_deinit(client);
 
-  if (args_need_free)
-    free_args(&arguments);
   if (response_filepath != NULL)
     free(response_filepath);
 
