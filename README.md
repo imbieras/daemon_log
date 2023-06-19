@@ -12,7 +12,7 @@ cmake version 3.22.1
 $ make --version
 GNU Make 4.3
 $ gcc --version
-gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0<
+gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0
 ```
 
 - libconfig
@@ -77,3 +77,5 @@ To run the program in daemon mode, use the following command:
 ```sh
 $ ./daemon_log -a --device_id=<device_id> --product_id=<product_id> --device_secret=<device_secret>
 ```
+
+You may also launch the program by placing the arguments in a `config.conf` file inside the project root directory

@@ -42,10 +42,6 @@ int main(int argc, char **argv) {
 
   response_filepath = path_from_home("/response.json");
 
-  syslog(LOG_INFO, "Product ID: %s", arguments.product_id);
-  syslog(LOG_INFO, "Device ID: %s", arguments.device_id);
-  syslog(LOG_INFO, "Secret: %s", arguments.device_secret);
-
   client_init(client, arguments.device_id, arguments.device_secret);
 
   while (!stop_loop) {
@@ -54,15 +50,7 @@ int main(int argc, char **argv) {
       return ret;
     }
 
-    char report[BUFFER_SIZE];
-    if ((execute_command(command, report)) == EXIT_SUCCESS) {
-      time_t current_time = time(NULL);
-      char response[BUFFER_SIZE];
-      snprintf(response, sizeof(response),
-               "{\"response\":{\"value\":\"%s\", \"time\":%lld}}", report,
-               (long long)current_time);
-      send_command_report(client, arguments.device_id, response);
-    }
+    process_command(client, command, arguments);
   }
 
   client_deinit(client);
