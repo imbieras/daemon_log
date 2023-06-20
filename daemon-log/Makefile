@@ -9,7 +9,7 @@ PKG_LICENSE_FILES:=LICENSE
 include $(INCLUDE_DIR)/package.mk
 
 define Package/daemon_log
-	CATEGORY:=Logging program
+	CATEGORY:=Utilities
 	TITLE:=daemon_log
 	DEPENDS:= +tuya-iot-core-sdk
 endef
