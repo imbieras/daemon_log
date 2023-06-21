@@ -84,6 +84,27 @@ void daemonize() {
   close(STDERR_FILENO);
 }
 
+int execute_command(const char *command, char *dest) {
+  FILE *process = popen(command, "r");
+  if (process == NULL) {
+    syslog(LOG_ERR, "Failed to execute command: %s", command);
+    return EXIT_FAILURE;
+  }
+
+  char buffer[BUFFER_SIZE];
+  size_t bytes_read = fread(buffer, sizeof(char), sizeof(buffer) - 1, process);
+  buffer[bytes_read] = '\0';
+
+  syslog(LOG_INFO, "Command output: %s", buffer);
+
+  strncpy(dest, buffer, bytes_read);
+  dest[bytes_read] = '\0';
+
+  pclose(process);
+
+  return EXIT_SUCCESS;
+}
+
 int write_json_to_file(const char *message, const char *filepath) {
   cJSON *json = cJSON_Parse(message);
   if (json == NULL) {

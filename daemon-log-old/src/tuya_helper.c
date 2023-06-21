@@ -1,6 +1,5 @@
 #include "helper.h"
 #include "tuya_cacert.h"
-#include "ubus_helper.h"
 #include <stdlib.h>
 #include <syslog.h>
 #include <time.h>
@@ -102,11 +101,15 @@ int send_command_report(tuya_mqtt_context_t *client, char *device_id,
   return OPRT_OK;
 }
 
-void process_command(struct ubus_context *ctx, uint32_t *id,
-                     struct MemData *memory, tuya_mqtt_context_t *client,
+void process_command(tuya_mqtt_context_t *client, const char *command,
                      struct arguments arguments) {
-  char response[BUFFER_SIZE];
-  if ((ubus_info_to_json(ctx, id, memory, response)) == EXIT_SUCCESS) {
+  char report[BUFFER_SIZE];
+  if ((execute_command(command, report)) == EXIT_SUCCESS) {
+    time_t current_time = time(NULL);
+    char response[BUFFER_SIZE];
+    snprintf(response, sizeof(response),
+             "{\"response\":{\"value\":\"%s\", \"time\":%lld}}", report,
+             (long long)current_time);
     send_command_report(client, arguments.device_id, response);
   }
 }

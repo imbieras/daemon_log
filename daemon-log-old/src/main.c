@@ -1,8 +1,6 @@
 #include "helper.h"
 #include "tuya_helper.h"
-#include "ubus_helper.h"
 #include <argp.h>
-#include <libubus.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -15,6 +13,8 @@
 #include <tuyalink_core.h>
 #include <unistd.h>
 
+const char *command = "echo 'Hello world'";
+
 tuya_mqtt_context_t client_instance;
 tuya_mqtt_context_t *client = &client_instance;
 
@@ -25,10 +25,6 @@ char *response_filepath = NULL;
 
 int main(int argc, char **argv) {
   int ret = OPRT_OK;
-  struct ubus_context *ctx = NULL;
-  uint32_t id;
-
-  struct MemData memory = {0};
 
   openlog("daemon_log", LOG_PID, LOG_DAEMON);
 
@@ -47,18 +43,14 @@ int main(int argc, char **argv) {
 
   client_init(client, arguments.device_id, arguments.device_secret);
 
-  ubus_init(ctx);
-
   while (!stop_loop) {
     if ((ret = tuya_mqtt_loop(client)) != OPRT_OK) {
       syslog(LOG_ERR, "Connection was dropped");
       return ret;
     }
 
-    process_command(ctx, &id, &memory, client, arguments);
+    process_command(client, command, arguments);
   }
-
-  ubus_deinit(ctx);
 
   client_deinit(client);
 
