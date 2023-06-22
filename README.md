@@ -1,22 +1,23 @@
 # daemon_log
 
-Simple daemon program that logs command output to Tuya IoT core
+Simple daemon program that logs Ubus system output to Tuya IoT core
 
 ## Prerequisites
 
-Before compiling and running this program, ensure that the following dependencies are installed on your system:
+This program is made for usage on OpenWrt systems, such as RutOS
+
+For compilation you need the following packages to be installed:
 
 ```sh
-$ cmake --version
-cmake version 3.22.1
-$ make --version
-GNU Make 4.3
-$ gcc --version
-gcc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0
+$ sudo apt install python3.10 python2 libncurses5-dev zlib1g-dev build-essential git gawk unzip u-boot-tools
 ```
 
-- libconfig
-- cJSON
+You should be using gcc 10 version. If you are using a newer or older version install gcc 10. Don't forget to change the default gcc and g++ version using these commands:
+
+```sh
+$ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
+$ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
+```
 
 You should also have a Tuya IoT account and product set up. For more information, read [here](https://github.com/tuya/tuya-iot-core-sdk/blob/main/README.md)
 
@@ -24,49 +25,35 @@ You should also have a Tuya IoT account and product set up. For more information
 
 **BEFORE YOU INSTALL:** please read the [prerequisites](#Prerequisites)
 
-Start with cloning this repo on your local machine:
+Start with cloning this repo on your local machine in the package folder:
 
 ```sh
-$ git clone https://github.com/imbieras/daemon_log.git
-$ cd daemon_log
+$ git clone https://github.com/imbieras/daemon_log.git -C package
 ```
 
-Download all the needed dependencies according to your distribution
-
-Clone the **tuya-iot-core-sdk** repo:
+Next, compile by running the following commands:
 
 ```sh
-$ git clone https://github.com/tuya/tuya-iot-core-sdk.git
+$ make package/tuya-iot-core-sdk/{clean,compile}
+$ make package/daemon-log/{clean,compile}
+$ make package/luci-app-daemon-log/{clean,compile}
 ```
 
-Change all `CMakeLists.txt` files to compile `SHARED` libraries
+The resulting `.ipkg` files should appear in `./bin/packages/.../base/`
 
-Compile it by doing the following:
+Upload these files to your system and install with opkg:
 
 ```sh
-$ cd tuya-iot-core-sdk
-$ mkdir build && cd build
-$ cmake ..
-$ make
+$ opkg install tuya-iot-core-sdk_0.0.1-1_<...>.ipkg
+$ opkg install daemon_log_0.1.0-1_<...>.ipkg
+$ opkg install luci-app-daemon-log_<...>.ipk
 ```
-
-Now, navigate to the `/src` directory:
-
-```sh
-$ cd ../../src
-```
-
-Compile the program:
-
-```sh
-$ make
-```
-
-The binary `daemon_log` should appear in the project root directory
 
 ## Usage
 
-To run the program, use the following command:
+You should be able to use the Luci web interface to enable the package
+
+To run the program manually, use the following command in the `~/usr/bin/` directory:
 
 ```sh
 $ ./daemon_log --device_id=<device_id> --product_id=<product_id> --device_secret=<device_secret>
@@ -77,5 +64,3 @@ To run the program in daemon mode, use the following command:
 ```sh
 $ ./daemon_log -a --device_id=<device_id> --product_id=<product_id> --device_secret=<device_secret>
 ```
-
-You may also launch the program by placing the arguments in a `config.conf` file inside the project root directory

@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #define BUFFER_SIZE 1024
+#define PATH_MAX 4096
 
 static char doc[] =
     "A daemon program that accepts arguments using argp and logs using syslog.";
@@ -24,10 +25,6 @@ struct arguments {
 };
 
 void signal_handler(int signal);
-int load_args_from_cfg(struct arguments *arguments);
-void prepare_args(struct argp argp, int argc, char **argv,
-                  struct arguments *arguments);
-void free_args(struct arguments *arguments);
 error_t parse_opt(int key, char *arg, struct argp_state *state);
 void daemonize();
 int execute_command(const char *command, char *dest);

@@ -1,10 +1,11 @@
-#include "../tuya-iot-core-sdk/include/tuyalink_core.h"
-#include "../tuya-iot-core-sdk/utils/tuya_error_code.h"
 #include "helper.h"
 #include "tuya_cacert.h"
+#include "ubus_helper.h"
 #include <stdlib.h>
 #include <syslog.h>
 #include <time.h>
+#include <tuya_error_code.h>
+#include <tuyalink_core.h>
 
 extern char *response_filepath;
 
@@ -101,15 +102,10 @@ int send_command_report(tuya_mqtt_context_t *client, char *device_id,
   return OPRT_OK;
 }
 
-void process_command(tuya_mqtt_context_t *client, const char *command,
+void process_command(struct ubus_context *ctx, tuya_mqtt_context_t *client,
                      struct arguments arguments) {
-  char report[BUFFER_SIZE];
-  if ((execute_command(command, report)) == EXIT_SUCCESS) {
-    time_t current_time = time(NULL);
-    char response[BUFFER_SIZE];
-    snprintf(response, sizeof(response),
-             "{\"response\":{\"value\":\"%s\", \"time\":%lld}}", report,
-             (long long)current_time);
+  char response[BUFFER_SIZE];
+  if ((ubus_info_to_json(ctx, response)) == EXIT_SUCCESS) {
     send_command_report(client, arguments.device_id, response);
   }
 }
