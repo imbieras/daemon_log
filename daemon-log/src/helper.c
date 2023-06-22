@@ -118,3 +118,9 @@ char *path_from_home(char *filepath) {
   snprintf(filepath_from_home, PATH_MAX, "%s%s", homedir, filepath);
   return filepath_from_home;
 }
+
+void cleanup(char *response_filepath) {
+  if (response_filepath != NULL) {
+    free(response_filepath);
+  }
+}

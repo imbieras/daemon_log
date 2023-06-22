@@ -8,9 +8,7 @@
 #include <sys/syslog.h>
 #include <time.h>
 
-int rc = 0;
-
-void board_cb(struct ubus_request *req, int type,
+static void board_cb(struct ubus_request *req, int type,
                      struct blob_attr *msg) {
   struct MemData *memoryData = (struct MemData *)req->priv;
   struct blob_attr *tb[__INFO_MAX];
@@ -33,10 +31,12 @@ void board_cb(struct ubus_request *req, int type,
   memoryData->buffered = blobmsg_get_u64(memory[BUFFERED_MEMORY]);
 }
 
-int ubus_info_to_json(struct ubus_context *ctx, uint32_t *id,
-                      struct MemData *memory, char *response) {
-  if (ubus_lookup_id(ctx, "system", id) ||
-      ubus_invoke(ctx, *id, "info", NULL, board_cb, memory, 3000)) {
+int ubus_info_to_json(struct ubus_context *ctx, char *response) {
+  struct MemData memory = {0};
+  uint32_t id;
+
+  if (ubus_lookup_id(ctx, "system", &id) ||
+      ubus_invoke(ctx, id, "info", NULL, board_cb, &memory, 3000)) {
     syslog(LOG_ERR, "Cannot request memory info from procd\n");
     return EXIT_FAILURE;
   } else {
@@ -44,20 +44,18 @@ int ubus_info_to_json(struct ubus_context *ctx, uint32_t *id,
     snprintf(response, BUFFER_SIZE,
              "{\"response\": {\"total\": %d, \"free\": %d, \"shared\": %d, "
              "\"buffered\": %d, \"time\": %lld}}",
-             memory->total, memory->free, memory->shared, memory->buffered,
+             memory.total, memory.free, memory.shared, memory.buffered,
              (long long)current_time);
   }
   return EXIT_SUCCESS;
 }
 
-int ubus_init(struct ubus_context *ctx) {
-  uloop_init();
-  ctx = ubus_connect(NULL);
-  if (!ctx) {
+int ubus_init(struct ubus_context **ctx) {
+  *ctx = ubus_connect(NULL);
+  if (!(*ctx)) {
     syslog(LOG_ERR, "Failed to connect to ubus\n");
     return EXIT_FAILURE;
   }
-  ubus_add_uloop(ctx);
   return EXIT_SUCCESS;
 }
 
@@ -67,6 +65,5 @@ int ubus_deinit(struct ubus_context *ctx) {
     return EXIT_FAILURE;
   }
   ubus_free(ctx);
-  uloop_done();
   return EXIT_SUCCESS;
 }

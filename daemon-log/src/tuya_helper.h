@@ -15,8 +15,7 @@ int client_init(tuya_mqtt_context_t *client, char *deviceId,
 int client_deinit(tuya_mqtt_context_t *client);
 int send_command_report(tuya_mqtt_context_t *client, char *device_id,
                         char *report);
-void process_command(struct ubus_context *ctx, uint32_t *id,
-                     struct MemData *memory, tuya_mqtt_context_t *client,
+void process_command(struct ubus_context *ctx, tuya_mqtt_context_t *client,
                      struct arguments arguments);
 
 #endif // TUYA_HELPER_H

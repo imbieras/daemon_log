@@ -102,11 +102,10 @@ int send_command_report(tuya_mqtt_context_t *client, char *device_id,
   return OPRT_OK;
 }
 
-void process_command(struct ubus_context *ctx, uint32_t *id,
-                     struct MemData *memory, tuya_mqtt_context_t *client,
+void process_command(struct ubus_context *ctx, tuya_mqtt_context_t *client,
                      struct arguments arguments) {
   char response[BUFFER_SIZE];
-  if ((ubus_info_to_json(ctx, id, memory, response)) == EXIT_SUCCESS) {
+  if ((ubus_info_to_json(ctx, response)) == EXIT_SUCCESS) {
     send_command_report(client, arguments.device_id, response);
   }
 }
