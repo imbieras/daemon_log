@@ -1,8 +1,6 @@
 #include "helper.h"
 #include "tuya_helper.h"
-#include "ubus_helper.h"
 #include <argp.h>
-#include <libubus.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -14,6 +12,8 @@
 #include <tuya_error_code.h>
 #include <tuyalink_core.h>
 #include <unistd.h>
+
+const char *command = "echo 'Hello world'";
 
 tuya_mqtt_context_t client_instance;
 tuya_mqtt_context_t *client = &client_instance;
@@ -41,21 +41,7 @@ int main(int argc, char **argv) {
 
   response_filepath = path_from_home("/response.json");
 
-  if ((ret = client_init(client, arguments.device_id,
-                         arguments.device_secret)) != OPRT_OK) {
-    syslog(LOG_ERR, "Failed to initialize client: %d", ret);
-    cleanup(response_filepath);
-    return ret;
-  }
-
-  struct ubus_context *ctx = NULL;
-
-  if (ubus_init(&ctx) != EXIT_SUCCESS) {
-    syslog(LOG_ERR, "Failed to initialize UBus context");
-    cleanup(response_filepath);
-    client_deinit(client);
-    return EXIT_FAILURE;
-  }
+  client_init(client, arguments.device_id, arguments.device_secret);
 
   while (!stop_loop) {
     if ((ret = tuya_mqtt_loop(client)) != OPRT_OK) {
@@ -63,12 +49,13 @@ int main(int argc, char **argv) {
       return ret;
     }
 
-    process_command(ctx, client, arguments);
+    process_command(client, command, arguments);
   }
 
-  cleanup(response_filepath);
-  ubus_deinit(ctx);
   client_deinit(client);
+
+  if (response_filepath != NULL)
+    free(response_filepath);
 
   closelog();
 
