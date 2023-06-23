@@ -36,7 +36,8 @@ static const struct blobmsg_policy info_policy[__INFO_MAX] = {
     [MEMORY_DATA] = {.name = "memory", .type = BLOBMSG_TYPE_TABLE},
 };
 
-static void board_cb(struct ubus_request *req, int type, struct blob_attr *msg);
+static void get_memory_cb(struct ubus_request *req, int type,
+                          struct blob_attr *msg);
 int ubus_info_to_json(struct ubus_context *ctx, char *response);
 int ubus_init(struct ubus_context **ctx);
 int ubus_deinit(struct ubus_context *ctx);

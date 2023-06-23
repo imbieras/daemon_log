@@ -11,7 +11,7 @@ Index: tuya-iot-core-sdk-0.0.1/CMakeLists.txt
  set(PLATFORM_DIR "${ROOT_DIR}/platform" CACHE INTERNAL "C SDK platform root.")
  set(LIBRARIES_DIR "${ROOT_DIR}/libraries" CACHE INTERNAL "C SDK libraries root.")
  set(LINKSDK_DIRS "${ROOT_DIR}")
-@@ -69,9 +69,29 @@ add_subdirectory( utils )
+@@ -69,9 +69,11 @@ add_subdirectory( utils )
  # Add link core.
  add_subdirectory( src )
  
@@ -21,40 +21,10 @@ Index: tuya-iot-core-sdk-0.0.1/CMakeLists.txt
 +# add_subdirectory( examples )
  
 +# Install targets
-+install(TARGETS link_core middleware_implementation utils_modules
-+        LIBRARY DESTINATION lib
-+        ARCHIVE DESTINATION lib)
-+
-+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/utils/
-+        DESTINATION include
-+        FILES_MATCHING PATTERN "*.h")
-+
-+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
-+        DESTINATION include
-+        FILES_MATCHING PATTERN "*.h")
-+
-+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/libraries/coreJSON/source/include/
-+        DESTINATION include
-+        FILES_MATCHING PATTERN "*.h")
-+
-+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/interface/
-+        DESTINATION include
-+        FILES_MATCHING PATTERN "*.h")
++install(CODE "MESSAGE(\"Created empty install target.\")")
  
  message(STATUS "------------------------------------------------------------" )
  message(STATUS "[Link SDK] Configuration summary."                            )
-Index: tuya-iot-core-sdk-0.0.1/libraries/mbedtls/library/CMakeLists.txt
-===================================================================
---- tuya-iot-core-sdk-0.0.1.orig/libraries/mbedtls/library/CMakeLists.txt
-+++ tuya-iot-core-sdk-0.0.1/libraries/mbedtls/library/CMakeLists.txt
-@@ -1,5 +1,5 @@
--option(USE_STATIC_MBEDTLS_LIBRARY "Build mbed TLS static library." ON)
--option(USE_SHARED_MBEDTLS_LIBRARY "Build mbed TLS shared library." OFF)
-+option(USE_STATIC_MBEDTLS_LIBRARY "Build mbed TLS static library." OFF)
-+option(USE_SHARED_MBEDTLS_LIBRARY "Build mbed TLS shared library." ON)
- option(LINK_WITH_PTHREAD "Explicitly link mbed TLS library to pthread." OFF)
- 
- set(src_crypto
 Index: tuya-iot-core-sdk-0.0.1/middleware/CMakeLists.txt
 ===================================================================
 --- tuya-iot-core-sdk-0.0.1.orig/middleware/CMakeLists.txt

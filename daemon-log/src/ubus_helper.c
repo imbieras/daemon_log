@@ -8,8 +8,8 @@
 #include <sys/syslog.h>
 #include <time.h>
 
-static void board_cb(struct ubus_request *req, int type,
-                     struct blob_attr *msg) {
+static void get_memory_cb(struct ubus_request *req, int type,
+                          struct blob_attr *msg) {
   struct MemData *memoryData = (struct MemData *)req->priv;
   struct blob_attr *tb[__INFO_MAX];
   struct blob_attr *memory[__MEMORY_MAX];
@@ -36,17 +36,17 @@ int ubus_info_to_json(struct ubus_context *ctx, char *response) {
   uint32_t id;
 
   if (ubus_lookup_id(ctx, "system", &id) ||
-      ubus_invoke(ctx, id, "info", NULL, board_cb, &memory, 3000)) {
+      ubus_invoke(ctx, id, "info", NULL, get_memory_cb, &memory, 3000)) {
     syslog(LOG_ERR, "Cannot request memory info from procd\n");
     return EXIT_FAILURE;
-  } else {
-    time_t current_time = time(NULL);
-    snprintf(response, BUFFER_SIZE,
-             "{\"response\": {\"total\": %d, \"free\": %d, \"shared\": %d, "
-             "\"buffered\": %d, \"time\": %lld}}",
-             memory.total, memory.free, memory.shared, memory.buffered,
-             (long long)current_time);
   }
+  time_t current_time = time(NULL);
+  snprintf(response, BUFFER_SIZE,
+           "{\"response\": {\"total\": %d, \"free\": %d, \"shared\": %d, "
+           "\"buffered\": %d, \"time\": %lld}}",
+           memory.total, memory.free, memory.shared, memory.buffered,
+           (long long)current_time);
+
   return EXIT_SUCCESS;
 }
 
