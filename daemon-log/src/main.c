@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
   argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
   signal(SIGINT, signal_handler);
+  signal(SIGTERM, signal_handler);
 
   if (arguments.daemon) {
     daemonize();
@@ -48,9 +49,7 @@ int main(int argc, char **argv) {
     return ret;
   }
 
-  struct ubus_context *ctx = NULL;
-
-  if (ubus_init(&ctx) != EXIT_SUCCESS) {
+  if (ubus_init() != EXIT_SUCCESS) {
     syslog(LOG_ERR, "Failed to initialize UBus context");
     cleanup(response_filepath);
     client_deinit(client);
@@ -63,11 +62,11 @@ int main(int argc, char **argv) {
       return ret;
     }
 
-    process_command(ctx, client, arguments);
+    process_command(client, arguments);
   }
 
   cleanup(response_filepath);
-  ubus_deinit(ctx);
+  ubus_deinit();
   client_deinit(client);
 
   closelog();

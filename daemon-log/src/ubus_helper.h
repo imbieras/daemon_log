@@ -5,41 +5,21 @@
 #include <libubus.h>
 #include <stdint.h>
 
-struct MemData {
-  int total;
-  int free;
-  int shared;
-  int buffered;
-};
-
 enum {
-  TOTAL_MEMORY,
-  FREE_MEMORY,
-  SHARED_MEMORY,
-  BUFFERED_MEMORY,
-  __MEMORY_MAX,
+  ESP_DEVICES_ATTR_DEVICES,
+  __ESP_DEVICES_ATTR_MAX,
 };
 
-enum {
-  MEMORY_DATA,
-  __INFO_MAX,
+static const struct blobmsg_policy devices_policy[__ESP_DEVICES_ATTR_MAX] = {
+    [ESP_DEVICES_ATTR_DEVICES] = {.name = "devices", .type = BLOBMSG_TYPE_ARRAY},
 };
 
-static const struct blobmsg_policy memory_policy[__MEMORY_MAX] = {
-    [TOTAL_MEMORY] = {.name = "total", .type = BLOBMSG_TYPE_INT64},
-    [FREE_MEMORY] = {.name = "free", .type = BLOBMSG_TYPE_INT64},
-    [SHARED_MEMORY] = {.name = "shared", .type = BLOBMSG_TYPE_INT64},
-    [BUFFERED_MEMORY] = {.name = "buffered", .type = BLOBMSG_TYPE_INT64},
-};
-
-static const struct blobmsg_policy info_policy[__INFO_MAX] = {
-    [MEMORY_DATA] = {.name = "memory", .type = BLOBMSG_TYPE_TABLE},
-};
-
-static void get_memory_cb(struct ubus_request *req, int type,
-                          struct blob_attr *msg);
-int ubus_info_to_json(struct ubus_context *ctx, char *response);
-int ubus_init(struct ubus_context **ctx);
-int ubus_deinit(struct ubus_context *ctx);
+int ubus_init();
+int ubus_deinit();
+int ubus_esp_control_on(char *port, int pin);
+int ubus_esp_control_off(char *port, int pin);
+static void get_devices_cb(struct ubus_request *req, int type,
+                           struct blob_attr *msg);
+int ubus_info_to_json(char *response);
 
 #endif // UBUS_HELPER_H

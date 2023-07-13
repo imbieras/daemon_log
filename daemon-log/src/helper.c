@@ -18,8 +18,8 @@ error_t argp_err_exit_status = 1;
 extern bool stop_loop;
 
 void signal_handler(int signal) {
-  if (signal == SIGINT) {
-    syslog(LOG_WARNING, "CTRL+C received. Stopping.");
+  if (signal == SIGINT || signal == SIGTERM) {
+    syslog(LOG_WARNING, "Signal received. Stopping.");
     stop_loop = true;
   }
 }
