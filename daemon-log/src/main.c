@@ -1,8 +1,7 @@
 #include "helper.h"
+#include "lua_helper.h"
 #include "tuya_helper.h"
-#include "ubus_helper.h"
 #include <argp.h>
-#include <libubus.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -21,6 +20,9 @@ tuya_mqtt_context_t *client = &client_instance;
 static struct argp argp = {options, parse_opt, 0, doc};
 
 bool stop_loop = false;
+
+struct loaded_script scripts[MAX_SCRIPTS];
+
 char *response_filepath = NULL;
 
 int main(int argc, char **argv) {
@@ -40,6 +42,15 @@ int main(int argc, char **argv) {
     syslog(LOG_INFO, "Daemon started");
   }
 
+  int num_scripts = 0;
+
+  load_lua_scripts(scripts, &num_scripts);
+
+  syslog(LOG_INFO, "Number of scripts: %d", num_scripts);
+  for (int i = 0; i < num_scripts; i++) {
+    syslog(LOG_INFO, "#%d script name: %s", i+1, scripts[i].file_name);
+  }
+
   response_filepath = path_from_home("/response.json");
 
   if ((ret = client_init(client, arguments.device_id,
@@ -49,25 +60,28 @@ int main(int argc, char **argv) {
     return ret;
   }
 
-  if (ubus_init() != EXIT_SUCCESS) {
-    syslog(LOG_ERR, "Failed to initialize UBus context");
-    cleanup(response_filepath);
-    client_deinit(client);
-    return EXIT_FAILURE;
-  }
+  char response[BUFFER_SIZE];
 
   while (!stop_loop) {
     if ((ret = tuya_mqtt_loop(client)) != OPRT_OK) {
       syslog(LOG_ERR, "Connection was dropped");
       return ret;
     }
-
-    process_command(client, arguments);
+    syslog(LOG_INFO, "Trying to execute get_data hooks for %d scripts", num_scripts);
+    for (int i = 0; i < num_scripts; i++) {
+      char response[BUFFER_SIZE];
+      call_get_data_hook(scripts[i].L, scripts[i].get_data_hook, response);
+      if (strlen(response) > 0) {
+        process_command(client, arguments, response);
+      }
+    }
   }
 
+  execute_destroy_hooks(scripts, num_scripts);
+
   cleanup(response_filepath);
-  ubus_deinit();
   client_deinit(client);
+  unload_lua_scripts(scripts, num_scripts);
 
   closelog();
 

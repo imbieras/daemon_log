@@ -7,8 +7,9 @@
 #define BUFFER_SIZE 1024
 #define PATH_MAX 4096
 
-static char doc[] = "A daemon program that accepts arguments using argp and "
-                    "logs Ubus information using syslog.";
+static char doc[] =
+    "A daemon program that accepts arguments using argp and "
+    "logs information according to Lua scripts to Tuya IoT cloud";
 
 static struct argp_option options[] = {
     {"daemon", 'a', 0, 0},
@@ -29,6 +30,7 @@ error_t parse_opt(int key, char *arg, struct argp_state *state);
 void daemonize();
 int write_json_to_file(const char *message, const char *filepath);
 char *path_from_home(char *filepath);
+void extract_filename(const char *path, char *file_name);
 void cleanup(char *response_filepath);
 
 #endif // HELPER_H

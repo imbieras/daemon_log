@@ -119,6 +119,13 @@ char *path_from_home(char *filepath) {
   return filepath_from_home;
 }
 
+void extract_filename(const char *path, char *file_name) {
+  const char *last_slash = strrchr(path, '/');
+  const char *start = (last_slash != NULL) ? last_slash + 1 : path;
+  memset(file_name, 0, BUFFER_SIZE);
+  strcpy(file_name, start);
+}
+
 void cleanup(char *response_filepath) {
   if (response_filepath != NULL) {
     free(response_filepath);

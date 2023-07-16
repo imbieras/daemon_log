@@ -11,7 +11,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/daemon_log
 	CATEGORY:=Utilities
 	TITLE:=daemon_log
-	DEPENDS:= +tuya-iot-core-sdk +libubus +libubox +libblobmsg-json
+	DEPENDS:= +tuya-iot-core-sdk +libubus +libubox +libblobmsg-json +liblua
 endef
 
 define Package/daemon_log/description

@@ -3,7 +3,7 @@ CFLAGS := $(GFLAGS)
 SOURCES := $(wildcard *.c)
 OBJS := $(SOURCES:.c=.o)
 BIN := daemon_log
-LDFLAGS := -llink_core -lutils_modules -lplatform_port -lmiddleware_implementation -largp -lblobmsg_json -lubox -lubus
+LDFLAGS := -llink_core -lutils_modules -lplatform_port -lmiddleware_implementation -largp -lblobmsg_json -lubox -lubus -llua
 
 .PHONY: all clean
 
