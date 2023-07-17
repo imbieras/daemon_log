@@ -21,7 +21,7 @@ function get_data()
   local random_index = math.random(1, #random_texts)
   local random_text = random_texts[random_index]
   
-  local data = { text = random_text }
+  local data = { response = random_text }
   
   local json_data = json.encode(data)
   

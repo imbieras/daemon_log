@@ -31,6 +31,7 @@ void daemonize();
 int write_json_to_file(const char *message, const char *filepath);
 char *path_from_home(char *filepath);
 void extract_filename(const char *path, char *file_name);
+bool is_valid_json(const char *str);
 void cleanup(char *response_filepath);
 
 #endif // HELPER_H

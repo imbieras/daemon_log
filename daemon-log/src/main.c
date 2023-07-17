@@ -1,9 +1,7 @@
 #include "helper.h"
 #include "lua_helper.h"
 #include "tuya_helper.h"
-#include <argp.h>
 #include <signal.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,7 +46,7 @@ int main(int argc, char **argv) {
 
   syslog(LOG_INFO, "Number of scripts: %d", num_scripts);
   for (int i = 0; i < num_scripts; i++) {
-    syslog(LOG_INFO, "#%d script name: %s", i+1, scripts[i].file_name);
+    syslog(LOG_INFO, "#%d script name: %s", i + 1, scripts[i].file_name);
   }
 
   response_filepath = path_from_home("/response.json");
@@ -67,17 +65,22 @@ int main(int argc, char **argv) {
       syslog(LOG_ERR, "Connection was dropped");
       return ret;
     }
-    syslog(LOG_INFO, "Trying to execute get_data hooks for %d scripts", num_scripts);
+    syslog(LOG_INFO, "Trying to execute get_data hooks for %d scripts",
+           num_scripts);
     for (int i = 0; i < num_scripts; i++) {
-      char response[BUFFER_SIZE];
-      call_get_data_hook(scripts[i].L, scripts[i].get_data_hook, response);
-      if (strlen(response) > 0) {
+      call_get_data_hook(scripts[i].L, response);
+      if ((strlen(response) > 0) && is_valid_json(response)) {
         process_command(client, arguments, response);
+        sleep(5);
+      } else {
+        syslog(LOG_WARNING, "No correct response from script %s",
+               scripts[i].file_name);
       }
     }
+    sleep(10);
   }
 
-  execute_destroy_hooks(scripts, num_scripts);
+  call_destory_hooks(scripts, num_scripts);
 
   cleanup(response_filepath);
   client_deinit(client);

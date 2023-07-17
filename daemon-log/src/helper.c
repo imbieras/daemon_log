@@ -1,14 +1,11 @@
 #include "helper.h"
-#include <argp.h>
 #include <cJSON.h>
 #include <pwd.h>
 #include <signal.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/syslog.h>
 #include <sys/types.h>
 #include <syslog.h>
 #include <unistd.h>
@@ -124,6 +121,17 @@ void extract_filename(const char *path, char *file_name) {
   const char *start = (last_slash != NULL) ? last_slash + 1 : path;
   memset(file_name, 0, BUFFER_SIZE);
   strcpy(file_name, start);
+}
+
+bool is_valid_json(const char *str) {
+  cJSON *json = cJSON_Parse(str);
+  if (json == NULL) {
+    cJSON_Delete(json);
+    return false;
+  }
+
+  cJSON_Delete(json);
+  return true;
 }
 
 void cleanup(char *response_filepath) {

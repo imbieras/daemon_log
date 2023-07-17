@@ -1,6 +1,6 @@
+#include "tuya_helper.h"
 #include "helper.h"
 #include "tuya_cacert.h"
-#include "tuya_helper.h"
 #include <stdlib.h>
 #include <syslog.h>
 #include <time.h>
@@ -17,25 +17,29 @@ void on_disconnect(tuya_mqtt_context_t *context, void *user_data) {
   syslog(LOG_INFO, "Client disconnected");
 }
 
-void on_messages(tuya_mqtt_context_t *context, void *user_data, const tuyalink_message_t *msg) {
+void on_messages(tuya_mqtt_context_t *context, void *user_data,
+                 const tuyalink_message_t *msg) {
   if (response_filepath == NULL) {
     syslog(LOG_ERR, "Response file path is not set");
     return;
   }
 
-  syslog(LOG_INFO, "On message id:%s, type:%d, code:%d", msg->msgid, msg->type, msg->code);
+  syslog(LOG_INFO, "On message id:%s, type:%d, code:%d", msg->msgid, msg->type,
+         msg->code);
 
   switch (msg->type) {
-    case THING_TYPE_PROPERTY_REPORT_RSP:
-      syslog(LOG_INFO, "Cloud received and replied: id:%s, type:%d", msg->msgid, msg->type);
-      break;
-    case THING_TYPE_PROPERTY_SET:
-      syslog(LOG_INFO, "Device received id:%s, type:%d", msg->msgid, msg->type);
-      write_json_to_file(msg->data_string, response_filepath);
-      break;
-    default:
-      break;
+  case THING_TYPE_PROPERTY_REPORT_RSP:
+    syslog(LOG_INFO, "Cloud received and replied: id:%s, type:%d", msg->msgid,
+           msg->type);
+    break;
+  case THING_TYPE_PROPERTY_SET:
+    syslog(LOG_INFO, "Device received id:%s, type:%d", msg->msgid, msg->type);
+    write_json_to_file(msg->data_string, response_filepath);
+    break;
+  default:
+    break;
   }
+
   printf("\r\n");
 }
 
@@ -66,7 +70,7 @@ int client_init(tuya_mqtt_context_t *client, char *deviceId,
     return ret;
   }
 
-  syslog(LOG_INFO, "Client was succesfuly initialized");
+  syslog(LOG_INFO, "Client was successfully initialized");
   return ret;
 }
 
@@ -83,13 +87,14 @@ int client_deinit(tuya_mqtt_context_t *client) {
     return ret;
   }
 
-  syslog(LOG_INFO, "Client was succesfuly deinitialized");
+  syslog(LOG_INFO, "Client was successfully deinitialized");
   return ret;
 }
 
 int send_command_report(tuya_mqtt_context_t *client, char *device_id,
                         char *report) {
   int ret = OPRT_OK;
+
   if ((ret = tuyalink_thing_property_report_with_ack(
            client, device_id, report)) == OPRT_INVALID_PARM) {
     syslog(LOG_ERR, "Failed to send report");
@@ -100,6 +105,7 @@ int send_command_report(tuya_mqtt_context_t *client, char *device_id,
   return OPRT_OK;
 }
 
-void process_command(tuya_mqtt_context_t *client, struct arguments arguments, char *response) {
+void process_command(tuya_mqtt_context_t *client, struct arguments arguments,
+                     char *response) {
   send_command_report(client, arguments.device_id, response);
 }

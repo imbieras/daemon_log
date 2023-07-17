@@ -1,5 +1,5 @@
 GFLAGS := -Wall -Wextra -pedantic -std=gnu99 -O2
-CFLAGS := $(GFLAGS)
+CFLAGS := $(GFLAGS) -ggdb3 -g
 SOURCES := $(wildcard *.c)
 OBJS := $(SOURCES:.c=.o)
 BIN := daemon_log
