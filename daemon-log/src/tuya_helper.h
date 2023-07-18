@@ -2,6 +2,7 @@
 #define TUYA_HELPER_H
 
 #include "helper.h"
+#include <tuya_error_code.h>
 #include <tuyalink_core.h>
 
 void on_connected(tuya_mqtt_context_t *context, void *user_data);

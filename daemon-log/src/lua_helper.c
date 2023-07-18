@@ -1,10 +1,14 @@
 #include "lua_helper.h"
 #include "helper.h"
 #include <dirent.h>
+#include <limits.h>
+#include <lua.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
+#include <unistd.h>
 
 extern struct loaded_script loaded_scripts[MAX_SCRIPTS];
 
@@ -27,6 +31,19 @@ void load_script(struct loaded_script *scripts, int *num_scripts,
     lua_close(L);
     return;
   }
+
+  lua_getglobal(L, "config");
+  if (lua_isfunction(L, -1)) {
+    lua_call(L, 0, 1);
+    int interval = lua_tointeger(L, -1);
+    if ((interval > 1) && ((unsigned)interval < UINT_MAX)) {
+      script->interval = interval;
+    }
+  } else {
+    script->interval = 30;
+  }
+
+  lua_pop(L, 1);
 
   lua_getglobal(L, "get_data");
   if (!lua_isfunction(L, -1)) {
@@ -68,6 +85,29 @@ void call_destory_hooks(struct loaded_script *scripts, int num_scripts) {
   for (int i = 0; i < num_scripts; i++) {
     lua_getglobal(scripts[i].L, "destroy");
     lua_call(scripts[i].L, 0, 0);
+  }
+}
+
+void execute_scripts(tuya_mqtt_context_t *client, struct arguments argument,
+                     struct loaded_script *scripts, int num_scripts) {
+  time_t current_time = time(NULL);
+
+  for (int i = 0; i < num_scripts; i++) {
+    struct loaded_script *script = &scripts[i];
+
+    if (current_time - script->last_execution >= script->interval) {
+      char response[BUFFER_SIZE];
+
+      call_get_data_hook(script->L, response);
+      if ((strlen(response) > 0) && is_valid_json(response)) {
+        process_command(client, argument, response);
+      } else {
+        syslog(LOG_WARNING, "No correct response from script %s",
+               script->file_name);
+      }
+
+      script->last_execution = current_time;
+    }
   }
 }
 

@@ -1,3 +1,7 @@
+function config()
+	return 15
+end
+
 function init()
 	-- Add any initialization code here
 end

@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <syslog.h>
 #include <time.h>
-#include <tuya_error_code.h>
-#include <tuyalink_core.h>
 
 extern char *response_filepath;
 

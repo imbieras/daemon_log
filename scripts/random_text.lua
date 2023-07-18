@@ -13,6 +13,10 @@ local random_texts = {
   "Cras ultricies ligula sed magna dictum porta."
 }
 
+function config()
+  return 5
+end
+
 function init()
   -- Add any initialization code here
 end

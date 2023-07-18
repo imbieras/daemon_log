@@ -74,6 +74,7 @@ Place your Lua scripts in the designated script folder (default: /usr/bin/script
 - `get_data` **(mandatory)**: Data collection function that is called repeatedly by the C program. This hook should collect and return the desired data. The C program will call this hook multiple times during its execution
 - `init` **(optional)**: Initialization function that is called once during the program startup. Use this hook to load files into memory, open connections, or perform any setup required by the script. This hook is not mandatory and can be omitted if not needed
 - `destroy` **(optional)**: Cleanup function that is called once at the end of the program. Use this hook to close connections, release resources, or perform any necessary cleanup actions. This hook is not mandatory and can be omitted if not needed
+- `config` **(optional)**: The config function that is called once during the program startup. Use this hook to set the interval of posting to the Tuya cloud
 
 The program will load and execute the Lua scripts present in the script folder
 
@@ -82,6 +83,7 @@ The program will load and execute the Lua scripts present in the script folder
 - Only scripts with valid descriptions (containing the get_data hook) will be loaded into the program
 - Each script is loaded once during the lifetime of the program and remains in program memory until the program terminates
 - The program can maintain 20 scripts in memory at any given time. If more scripts are present, the excess scripts will be ignored
+- The default interval for launching scripts is 30 seconds, this can be changed in the config function of a script
 - If a script is modified or added while the program is running, it will not be automatically loaded. You need to restart the program for the changes to take effect
 
 ### Customizing Script Folder

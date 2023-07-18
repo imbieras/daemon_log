@@ -8,8 +8,6 @@
 #include <sys/stat.h>
 #include <syslog.h>
 #include <time.h>
-#include <tuya_error_code.h>
-#include <tuyalink_core.h>
 #include <unistd.h>
 
 tuya_mqtt_context_t client_instance;
@@ -17,11 +15,11 @@ tuya_mqtt_context_t *client = &client_instance;
 
 static struct argp argp = {options, parse_opt, 0, doc};
 
-bool stop_loop = false;
-
 struct loaded_script scripts[MAX_SCRIPTS];
 
 char *response_filepath = NULL;
+
+bool stop_loop = false;
 
 int main(int argc, char **argv) {
   int ret = OPRT_OK;
@@ -43,6 +41,10 @@ int main(int argc, char **argv) {
   int num_scripts = 0;
 
   load_lua_scripts(scripts, &num_scripts);
+  time_t current_time = time(NULL);
+  for (int i = 0; i < num_scripts; i++) {
+    scripts[i].last_execution = current_time;
+  }
 
   syslog(LOG_INFO, "Number of scripts: %d", num_scripts);
   for (int i = 0; i < num_scripts; i++) {
@@ -58,26 +60,14 @@ int main(int argc, char **argv) {
     return ret;
   }
 
-  char response[BUFFER_SIZE];
-
   while (!stop_loop) {
     if ((ret = tuya_mqtt_loop(client)) != OPRT_OK) {
       syslog(LOG_ERR, "Connection was dropped");
       return ret;
     }
-    syslog(LOG_INFO, "Trying to execute get_data hooks for %d scripts",
-           num_scripts);
-    for (int i = 0; i < num_scripts; i++) {
-      call_get_data_hook(scripts[i].L, response);
-      if ((strlen(response) > 0) && is_valid_json(response)) {
-        process_command(client, arguments, response);
-        sleep(5);
-      } else {
-        syslog(LOG_WARNING, "No correct response from script %s",
-               scripts[i].file_name);
-      }
-    }
-    sleep(10);
+
+    execute_scripts(client, arguments, scripts, num_scripts);
+    sleep(1);
   }
 
   call_destory_hooks(scripts, num_scripts);
