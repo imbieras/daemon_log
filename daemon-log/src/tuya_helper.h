@@ -5,6 +5,8 @@
 #include <tuya_error_code.h>
 #include <tuyalink_core.h>
 
+#define ACTIONS_SUBDIR "actions/"
+
 void on_connected(tuya_mqtt_context_t *context, void *user_data);
 void on_disconnect(tuya_mqtt_context_t *context, void *user_data);
 void on_messages(tuya_mqtt_context_t *context, void *user_data,

@@ -111,6 +111,31 @@ void execute_scripts(tuya_mqtt_context_t *client, struct arguments argument,
   }
 }
 
+void execute_action(char *lua_script, char *action, char *input_params) {
+  lua_State *L = luaL_newstate();
+  luaL_openlibs(L);
+
+  if (luaL_dofile(L, lua_script) != LUA_OK) {
+    syslog(LOG_ERR, "Failed to load and execute the Lua file: %s",
+           lua_tostring(L, -1));
+    return;
+  }
+
+  lua_getglobal(L, action);
+  if (lua_isfunction(L, -1)) {
+    lua_pushstring(L, input_params);
+
+    if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
+      syslog(LOG_ERR, "Failed to execute the action: %s", lua_tostring(L, -1));
+    }
+  } else {
+    syslog(LOG_WARNING, "Action '%s' not found in Lua script '%s'", action,
+           lua_script);
+  }
+
+  lua_close(L);
+}
+
 void load_lua_scripts(struct loaded_script *scripts, int *num_scripts) {
   char *scripts_dir = malloc(strlen(SCRIPTS_DIR) + 1);
   if (scripts_dir == NULL) {

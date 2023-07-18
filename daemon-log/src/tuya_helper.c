@@ -1,7 +1,10 @@
 #include "tuya_helper.h"
 #include "helper.h"
+#include "lua_helper.h"
 #include "tuya_cacert.h"
+#include <cJSON.h>
 #include <stdlib.h>
+#include <string.h>
 #include <syslog.h>
 #include <time.h>
 
@@ -33,6 +36,16 @@ void on_messages(tuya_mqtt_context_t *context, void *user_data,
   case THING_TYPE_PROPERTY_SET:
     syslog(LOG_INFO, "Device received id:%s, type:%d", msg->msgid, msg->type);
     write_json_to_file(msg->data_string, response_filepath);
+    break;
+  case THING_TYPE_ACTION_EXECUTE:
+    syslog(LOG_INFO, "Trying to handle action for: %s", msg->data_string);
+
+    if (strlen(msg->data_string) == 0) {
+      syslog(LOG_ERR, "Empty JSON string");
+      break;
+    }
+
+    handle_action(msg->data_string);
     break;
   default:
     break;
@@ -106,4 +119,79 @@ int send_command_report(tuya_mqtt_context_t *client, char *device_id,
 void process_command(tuya_mqtt_context_t *client, struct arguments arguments,
                      char *response) {
   send_command_report(client, arguments.device_id, response);
+}
+
+void handle_action(char *json_str) {
+  cJSON *root = cJSON_Parse(json_str);
+  if (root == NULL) {
+    syslog(LOG_ERR, "Error parsing JSON");
+    return;
+  }
+
+  cJSON *action_code = cJSON_GetObjectItem(root, "actionCode");
+  if (action_code == NULL) {
+    syslog(LOG_ERR, "Error retrieving action code from JSON");
+    cJSON_Delete(root);
+    return;
+  }
+
+  cJSON *input_params = cJSON_GetObjectItem(root, "inputParams");
+  if (input_params == NULL) {
+    syslog(LOG_ERR, "Error retrieving input parameters from JSON");
+    cJSON_Delete(root);
+    return;
+  }
+
+  char *input_params_str = NULL;
+  input_params_str = cJSON_Print(input_params);
+
+  char *action_code_str = NULL;
+  action_code_str = action_code->valuestring;
+
+  const char *delim = "_";
+
+  char *tok = strtok(action_code_str, delim);
+  char *lua_script = strdup(tok);
+  tok = strtok(NULL, delim);
+  char *action = strdup(tok);
+
+  if ((lua_script == NULL) || (action == NULL)) {
+    syslog(LOG_ERR, "Could not get script name or action from actionCode");
+    free(action);
+    free(lua_script);
+    cJSON_free(input_params_str);
+    cJSON_Delete(root);
+    return;
+  }
+
+  size_t lua_script_len = strlen(lua_script);
+  size_t dir_len = strlen(SCRIPTS_DIR);
+
+  size_t new_len =
+      dir_len + 1 + lua_script_len + strlen(LUA_FILE_EXTENSION) + 1;
+
+  char *new_lua_script = malloc(new_len);
+  if (new_lua_script == NULL) {
+    syslog(LOG_ERR, "Failed to allocate memory for new_lua_script");
+    free(action);
+    free(lua_script);
+    cJSON_free(input_params_str);
+    cJSON_Delete(root);
+    return;
+  }
+
+  sprintf(new_lua_script, "%s%s%s%s", SCRIPTS_DIR, ACTIONS_SUBDIR, lua_script,
+          LUA_FILE_EXTENSION);
+
+  free(lua_script);
+  lua_script = new_lua_script;
+
+  syslog(LOG_INFO, "Launching action %s in lua script file %s with params: %s",
+         action, lua_script, input_params_str);
+  execute_action(lua_script, action, input_params_str);
+
+  free(action);
+  free(lua_script);
+  cJSON_free(input_params_str);
+  cJSON_Delete(root);
 }

@@ -76,6 +76,8 @@ Place your Lua scripts in the designated script folder (default: /usr/bin/script
 - `destroy` **(optional)**: Cleanup function that is called once at the end of the program. Use this hook to close connections, release resources, or perform any necessary cleanup actions. This hook is not mandatory and can be omitted if not needed
 - `config` **(optional)**: The config function that is called once during the program startup. Use this hook to set the interval of posting to the Tuya cloud
 
+Scripts for Tuya IoT actions should be placed in the "actions" subfolder within the script folder. The scripts should follow a specific naming convention: scriptfilename_scriptfunction. The script filename and script function should be separated by an underscore (_)
+
 The program will load and execute the Lua scripts present in the script folder
 
 ### Script management

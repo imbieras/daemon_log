@@ -9,7 +9,7 @@
 #include <time.h>
 
 #define MAX_SCRIPTS 20
-#define SCRIPTS_DIR "/usr/bin/scripts"
+#define SCRIPTS_DIR "/usr/bin/scripts/"
 #define LUA_FILE_EXTENSION ".lua"
 #define LUA_OK 0
 
@@ -26,6 +26,7 @@ void call_get_data_hook(lua_State *L, char *response);
 void call_destory_hooks(struct loaded_script *scripts, int num_scripts);
 void execute_scripts(tuya_mqtt_context_t *client, struct arguments argument,
                      struct loaded_script *scripts, int num_scripts);
+void execute_action(char *lua_script, char *action, char *input_params);
 void load_lua_scripts(struct loaded_script *scripts, int *num_scripts);
 void unload_lua_scripts(struct loaded_script *scripts, int num_scripts);
 
